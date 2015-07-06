@@ -72,7 +72,7 @@
 
     NSMutableArray *accessoryDictionary = [[NSMutableArray alloc] init];
     for (EAAccessory *device in _accessoryList) {
-        if ([[device protocolStrings] containsObject:@"com.RovingNetworks.btdemo"]) {
+        if ([[device protocolStrings] containsObject:@"com.socketmobile.chs"]) {
             NSMutableDictionary *tmpDic=[[NSMutableDictionary alloc] init];
             [tmpDic setObject:device.name forKey:@"name"];
             [tmpDic setObject:[NSString stringWithFormat:@"%@",  @(device.connectionID)] forKey:@"id"];

@@ -2,7 +2,7 @@
 <plugin
     xmlns="http://www.phonegap.com/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    id="com.improvisio.bluetoothserial"
+    id="com.niou-ns.bluetoothserial"
     version="2.1.0">
 
     <name>Bluetooth Serial</name>
@@ -10,7 +10,7 @@
        but using ExternalAccessory framework on ios for communication with bluetooth classic.</description>
     <license>Apache 2.0</license>
     <keywords>bluetooth</keywords>
-    <repo>https://github.com/matejkriz/BluetoothSerial</repo>
+    <repo>https://github.com/niou-ns/BluetoothSerial</repo>
 
     <engines>
         <engine name="cordova" version=">=2.9.0" />
@@ -63,7 +63,7 @@
 
         <config-file target="*-Info.plist" parent="UISupportedExternalAccessoryProtocols">
           <array>
-            <string>com.RovingNetworks.btdemo</string>
+            <string>com.socketmobile.chs</string>
           </array>
         </config-file>
 

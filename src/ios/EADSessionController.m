@@ -131,7 +131,7 @@ NSString *EADSessionDataReceivedNotification = @"EADSessionDataReceivedNotificat
 
 // open a session with the accessory and set up the input and output stream on the default run loop
 - (BOOL)openSession:(EAAccessory *)accessory{
-    _protocolString = @"com.RovingNetworks.btdemo";
+    _protocolString = @"com.socketmobile.chs";
 
     _buffer = [[NSString alloc] init];
 
