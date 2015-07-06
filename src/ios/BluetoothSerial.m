@@ -172,10 +172,8 @@ typedef struct
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void)read:(CDVInvokedUrlCommand*)command
+- (NSString*) fetchAvailableData
 {
-    CDVPluginResult* pluginResult = nil;
-
     NSData *data = [[NSData alloc] init];
     unsigned long bytesAvailable = 0;
     while ((bytesAvailable = [_eaSessionController readBytesAvailable]) > 0) {
@@ -188,7 +186,28 @@ typedef struct
 
     RawScanData* scanData = (RawScanData*) buffer;
 
-    NSString* message = [[NSString alloc] initWithBytes:&scanData->data length:scanData->lth encoding:NSASCIIStringEncoding];
+    NSString* currentData = [[NSString alloc] initWithBytes:&scanData->data length:scanData->lth encoding:NSASCIIStringEncoding];
+	return currentData;
+}
+
+- (void)read:(CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult = nil;
+
+//     NSData *data = [[NSData alloc] init];
+//     unsigned long bytesAvailable = 0;
+//     while ((bytesAvailable = [_eaSessionController readBytesAvailable]) > 0) {
+//         data = [_eaSessionController readData:bytesAvailable];
+//     }
+// 
+//     unsigned char *buffer;
+//     buffer = (unsigned char*)[data bytes];
+//     [data getBytes:buffer length:[data length]];
+// 
+//     RawScanData* scanData = (RawScanData*) buffer;
+// 
+//     NSString* message = [[NSString alloc] initWithBytes:&scanData->data length:scanData->lth encoding:NSASCIIStringEncoding];
+	NSString* message = [self fetchAvailableData];
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:message];
 
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -261,7 +280,8 @@ typedef struct
 
 - (void) sendDataToSubscriber {
 
-    NSString *message = [self readUntilDelimiter:_delimiter];
+//    NSString *message = [self readUntilDelimiter:_delimiter];
+	NSString* message = [self fetchAvailableData];
 
     if ([message length] > 0) {
         CDVPluginResult *pluginResult = nil;
