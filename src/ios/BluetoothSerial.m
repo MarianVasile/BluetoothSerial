@@ -4,6 +4,7 @@
 //
 //  Created by Matěj Kříž on 27.01.15.
 //
+// Edited by Guy Umbright, Krzysztof Pintscher on 06.07.2015
 //
 
 #import "BluetoothSerial.h"
@@ -11,6 +12,23 @@
 
 @implementation BluetoothSerial
 
+typedef struct
+{
+    uint8_t f1;
+    uint8_t seq;
+    uint8_t f2;
+    uint8_t f3;
+
+    uint16_t f4;
+    uint16_t f5;
+
+    uint32_t f6;
+
+    uint16_t lth;
+    uint16_t f7;
+    uint8_t f8;
+    uint8_t data;
+} RawScanData;
 
 - (void)connect:(CDVInvokedUrlCommand*)command
 {
@@ -168,11 +186,14 @@
     buffer = (unsigned char*)[data bytes];
     [data getBytes:buffer length:[data length]];
 
-    NSString* message = [NSString stringWithFormat: @"%s", (char *)buffer];
+    RawScanData* scanData = (RawScanData*) buffer;
+
+    NSString* message = [[NSString alloc] initWithBytes:&scanData->data length:scanData->lth encoding:NSASCIIStringEncoding];
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:message];
 
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
+
 
 - (void)readUntil:(CDVInvokedUrlCommand*)command
 {
