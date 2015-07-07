@@ -98,10 +98,7 @@ NSString *EADSessionDataReceivedNotification = @"EADSessionDataReceivedNotificat
         bytesAvailable += bytesRead;
     }
 
-    uint8_t delimiter = _delimiter | '\n';
-    if(buf[bytesAvailable - 1] == delimiter){
-        [[NSNotificationCenter defaultCenter] postNotificationName:EADSessionDataReceivedNotification object:self userInfo:nil];
-    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:EADSessionDataReceivedNotification object:self userInfo:nil];
 }
 
 #pragma mark Public Methods

@@ -241,10 +241,14 @@ typedef struct
     buffer = (unsigned char*)[data bytes];
     [data getBytes:buffer length:[data length]];
 
-    RawScanData* scanData = (RawScanData*) buffer;
+    if ([data length] > 0) {
+      RawScanData* scanData = (RawScanData*) buffer;
 
-    NSString* currentData = [[NSString alloc] initWithBytes:&scanData->data length:scanData->lth encoding:NSASCIIStringEncoding];
-	return currentData;
+      NSString* currentData = [[NSString alloc] initWithBytes:&scanData->data length:scanData->lth encoding:NSASCIIStringEncoding];
+  	  return currentData;
+    } else {
+      return nil;
+    }
 }
 
 - (void)read:(CDVInvokedUrlCommand*)command
@@ -291,16 +295,7 @@ typedef struct
 
 - (void)subscribe:(CDVInvokedUrlCommand*)command
 {
-    NSString *delimiter = [command.arguments objectAtIndex:0];
-
-    if (delimiter == nil) {
-        delimiter = @"\n";
-    }
-
     _subscribeCallbackId = [command.callbackId copy];
-    _delimiter = [delimiter copy];
-
-    [_eaSessionController setDelimiter:delimiter];
 
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     NSOperationQueue *mainQueue = [NSOperationQueue mainQueue];
