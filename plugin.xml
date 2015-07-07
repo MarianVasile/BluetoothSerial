@@ -67,5 +67,11 @@
           </array>
         </config-file>
 
+        <config-file target="*-Info.plist" parent="UIBackgroundModes">
+          <array>
+            <string>external-accessory</string>
+          </array>
+        </config-file>
+
     </platform>
 </plugin>
