@@ -5,6 +5,10 @@ module.exports = {
 		cordova.exec(success, failure, "BluetoothSerial", "connect", [macAddress]);
 	},
 
+	connectMac: function(macAddress, success, failure) {
+		cordova.exec(success, failure, "BluetoothSerial", "connectMac", [macAddress]);
+	},
+
 	// Android only - see http://goo.gl/1mFjZY
 	connectInsecure: function(macAddress, success, failure) {
 		cordova.exec(success, failure, "BluetoothSerial", "connectInsecure", [

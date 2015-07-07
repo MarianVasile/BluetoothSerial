@@ -4,11 +4,15 @@
 //
 //  Created by Matěj Kříž on 27.01.15.
 //
-// Edited by Guy Umbright, Krzysztof Pintscher on 06.07.2015
+// Edited by Guy Umbright, Krzysztof Pintscher on 07.07.2015
 //
 
 #import "BluetoothSerial.h"
 #import <Cordova/CDV.h>
+
+@interface EAAccessoryBluetooth : EAAccessory
+@property(readonly, nonatomic) NSString *macAddress;
+@end
 
 @implementation BluetoothSerial
 
@@ -43,8 +47,8 @@ typedef struct
     NSArray *accessories = [[EAAccessoryManager sharedAccessoryManager]
                             connectedAccessories];
 
-    EAAccessory *accessory = nil;
-    for (EAAccessory *obj in accessories) {
+    EAAccessoryBluetooth *accessory = nil;
+    for (EAAccessoryBluetooth *obj in accessories) {
         if ([obj connectionID] == [deviceID integerValue]){
             accessory = obj;
             break;
@@ -56,6 +60,7 @@ typedef struct
     NSMutableDictionary *deviceDictionary = [[NSMutableDictionary alloc] init];
 
     [deviceDictionary setObject:accessory.name forKey:@"name"];
+    [deviceDictionary setObject:accessory.macAddress forKey:@"macAddress"];
     [deviceDictionary setObject:[NSString stringWithFormat:@"%@",  @(accessory.connectionID)] forKey:@"id"];
 
 
@@ -67,6 +72,54 @@ typedef struct
 
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
+
+- (void)connectMac:(CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult = nil;
+
+    NSString *deviceMac = [command.arguments objectAtIndex:0];
+
+    if (!_eaSessionController){
+        _eaSessionController = [EADSessionController sharedController];
+    }
+
+    NSArray *accessories = [[EAAccessoryManager sharedAccessoryManager]
+                            connectedAccessories];
+
+    EAAccessoryBluetooth *accessory = nil;
+    for (EAAccessoryBluetooth *obj in accessories) {
+        if ([[obj macAddress] isEqualToString:deviceMac]){
+            accessory = obj;
+            break;
+        }
+    }
+
+    if (accessory == nil) {
+
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Device could not connect!"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+
+    } else {
+
+        bool result = [_eaSessionController openSession:accessory];
+
+        NSMutableDictionary *deviceDictionary = [[NSMutableDictionary alloc] init];
+
+        [deviceDictionary setObject:accessory.name forKey:@"name"];
+        [deviceDictionary setObject:accessory.macAddress forKey:@"macAddress"];
+        [deviceDictionary setObject:[NSString stringWithFormat:@"%@",  @(accessory.connectionID)] forKey:@"id"];
+
+
+        if(result){
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:deviceDictionary];
+        } else {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Device could not connect!"];
+        }
+
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }
+}
+
 - (void)disconnect:(CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = nil;
@@ -89,10 +142,11 @@ typedef struct
     NSLog(@"_accessoryList %@", _accessoryList);
 
     NSMutableArray *accessoryDictionary = [[NSMutableArray alloc] init];
-    for (EAAccessory *device in _accessoryList) {
+    for (EAAccessoryBluetooth *device in _accessoryList) {
         if ([[device protocolStrings] containsObject:@"com.socketmobile.chs"]) {
             NSMutableDictionary *tmpDic=[[NSMutableDictionary alloc] init];
             [tmpDic setObject:device.name forKey:@"name"];
+            [tmpDic setObject:device.macAddress forKey:@"macAddress"];
             [tmpDic setObject:[NSString stringWithFormat:@"%@",  @(device.connectionID)] forKey:@"id"];
 
             [accessoryDictionary addObject:tmpDic];
@@ -120,6 +174,9 @@ typedef struct
     [[EAAccessoryManager sharedAccessoryManager] showBluetoothAccessoryPickerWithNameFilter:nil completion:^(NSError *error) {
         [self.commandDelegate runInBackground:^{
             CDVPluginResult* pluginResult = nil;
+            if (error) {
+                NSLog(@"error :%@", error);
+            }
             if(error != nil && [error code] == EABluetoothAccessoryPickerResultCancelled) {
                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:@[]];
             } else {
@@ -199,13 +256,13 @@ typedef struct
 //     while ((bytesAvailable = [_eaSessionController readBytesAvailable]) > 0) {
 //         data = [_eaSessionController readData:bytesAvailable];
 //     }
-// 
+//
 //     unsigned char *buffer;
 //     buffer = (unsigned char*)[data bytes];
 //     [data getBytes:buffer length:[data length]];
-// 
+//
 //     RawScanData* scanData = (RawScanData*) buffer;
-// 
+//
 //     NSString* message = [[NSString alloc] initWithBytes:&scanData->data length:scanData->lth encoding:NSASCIIStringEncoding];
 	NSString* message = [self fetchAvailableData];
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:message];
