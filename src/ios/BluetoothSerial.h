@@ -16,6 +16,7 @@
     NSMutableArray *_accessoryList;
     EADSessionController *_eaSessionController;
     NSString *_subscribeCallbackId;
+    NSString *_listenerCallbackId;
     NSString *_delimiter;
     NSObject *_dataReceivedObserver;
 }
@@ -23,6 +24,7 @@
  - (void)connect:(CDVInvokedUrlCommand*)command;
  - (void)disconnect:(CDVInvokedUrlCommand*)command;
  - (void)list:(CDVInvokedUrlCommand*)command;
+ - (void)listenToDevice:(CDVInvokedUrlCommand*)command;
  - (void)connectIOS:(CDVInvokedUrlCommand*)command;
  - (void)isEnabled:(CDVInvokedUrlCommand*)command;
  - (void)isConnected:(CDVInvokedUrlCommand*)command;

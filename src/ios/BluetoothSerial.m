@@ -293,6 +293,53 @@ typedef struct
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)listenToDevice:(CDVInvokedUrlCommand*)command
+{
+    _listenerCallbackId = [command.callbackId copy];
+
+    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+
+    [center addObserver:self
+               selector:@selector(_accessoryDisconnected:)
+                   name:EAAccessoryDidDisconnectNotification
+               object:nil];
+
+    [center addObserver:self
+               selector:@selector(_accessoryConnected:)
+                   name:EAAccessoryDidConnectNotification
+                 object:nil];
+
+    [[EAAccessoryManager sharedAccessoryManager] registerForLocalNotifications];
+}
+
+- (void) _accessoryDisconnected:(NSNotification*)notification {
+    CDVPluginResult *pluginResult = nil;
+
+    NSMutableDictionary *statusDictionary = [[NSMutableDictionary alloc] init];
+
+    [self removeSubscription];
+    [_eaSessionController closeSession];
+
+    [statusDictionary setObject:[NSNumber numberWithBool:YES] forKey:@"disconnected"];
+
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:statusDictionary];
+    [pluginResult setKeepCallbackAsBool:TRUE];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:_listenerCallbackId];
+}
+
+- (void) _accessoryConnected:(NSNotification*)notification {
+    CDVPluginResult *pluginResult = nil;
+
+    NSMutableDictionary *statusDictionary = [[NSMutableDictionary alloc] init];
+
+    [statusDictionary setObject:[NSNumber numberWithBool:YES] forKey:@"connected"];
+
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:statusDictionary];
+    [pluginResult setKeepCallbackAsBool:TRUE];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:_listenerCallbackId];
+}
+
+
 - (void)subscribe:(CDVInvokedUrlCommand*)command
 {
     _subscribeCallbackId = [command.callbackId copy];
