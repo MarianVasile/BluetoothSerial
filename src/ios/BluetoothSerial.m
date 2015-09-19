@@ -5,6 +5,7 @@
 //  Created by Matěj Kříž on 27.01.15.
 //
 // Edited by Guy Umbright, Krzysztof Pintscher on 07.07.2015
+// Edited by Guy Umbright on 18.09.2015 - Guy is THE guy!
 //
 
 #import "BluetoothSerial.h"
@@ -16,6 +17,15 @@
 
 @implementation BluetoothSerial
 
+//This structure was set up for the Socket Mobile 7x(?) scanner, but it is being reused for
+//the Model 6 as well.  They appear to have significantly differnt outputs.
+//As mentioned above, the 7 outputs the following structure, the 6 outputs:
+//
+// One byte of total length
+// 0xF3000003 - consistently with our scanner
+// ASCII data of length = header length - 5
+//
+// See fetchAvailableData: below for more
 typedef struct
 {
     uint8_t f1;
@@ -23,7 +33,8 @@ typedef struct
     uint8_t f2;
     uint8_t f3;
 
-    uint16_t f4;
+    uint8_t f4;
+    uint8_t f4a;
     uint16_t f5;
 
     uint32_t f6;
@@ -241,13 +252,25 @@ typedef struct
     buffer = (unsigned char*)[data bytes];
     [data getBytes:buffer length:[data length]];
 
-    if ([data length] > 0) {
-      RawScanData* scanData = (RawScanData*) buffer;
+    if ([data length] > 0)
+    {
+        RawScanData* scanData = (RawScanData*) buffer;
 
-      NSString* currentData = [[NSString alloc] initWithBytes:&scanData->data length:scanData->lth encoding:NSASCIIStringEncoding];
-  	  return currentData;
+        //As mentioned above, the two scanners produce different outputs.  We are differentiating the 6 & 7 by looking at
+        //the contents of byte offset 1-4.  If it contains 0xF3000003 we assume it is output from a model 6 scanner
+        NSString* currentData;
+        if (scanData->seq == 0xF3 && scanData->f2 == 0x00 && scanData->f3 == 0x00 && scanData->f4 == 0x03)
+        {
+            int lth = scanData->f1 - 5;
+            currentData = [[NSString alloc] initWithBytes:&scanData->f4a length:lth encoding:NSASCIIStringEncoding];
+        }
+        else
+        {
+            currentData = [[NSString alloc] initWithBytes:&scanData->data length:scanData->lth encoding:NSASCIIStringEncoding];
+        }
+        return currentData;
     } else {
-      return nil;
+        return nil;
     }
 }
 

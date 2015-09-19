@@ -25,9 +25,9 @@ module.exports = {
 		cordova.exec(success, failure, "BluetoothSerial", "list", []);
 	},
 
-    listenToDevice: function(success, failure) {
-      cordova.exec(success, failure, "BluetoothSerial", "listenToDevice", []);
-    },
+  listenToDevice: function(success, failure) {
+    cordova.exec(success, failure, "BluetoothSerial", "listenToDevice", []);
+  },
 
 	// list bound devices
 	connectIOS: function(success, failure) {
