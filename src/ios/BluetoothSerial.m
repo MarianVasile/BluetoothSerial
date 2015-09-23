@@ -5,7 +5,7 @@
 //  Created by Matěj Kříž on 27.01.15.
 //
 // Edited by Guy Umbright, Krzysztof Pintscher on 07.07.2015
-// Edited by Guy Umbright on 18.09.2015 - Guy is THE guy!
+// Edited by Guy Umbright on 23.09.2015 - Guy is THE guy!
 //
 
 #import "BluetoothSerial.h"
@@ -22,7 +22,7 @@
 //As mentioned above, the 7 outputs the following structure, the 6 outputs:
 //
 // One byte of total length
-// 0xF3000003 - consistently with our scanner
+// 0xF30000nn - consistently with our scanner where nn = 0x03 or 0x0F (as we have seen) based on the bar code scanned
 // ASCII data of length = header length - 5
 //
 // See fetchAvailableData: below for more
@@ -257,9 +257,10 @@ typedef struct
         RawScanData* scanData = (RawScanData*) buffer;
 
         //As mentioned above, the two scanners produce different outputs.  We are differentiating the 6 & 7 by looking at
-        //the contents of byte offset 1-4.  If it contains 0xF3000003 we assume it is output from a model 6 scanner
+        //the contents of byte offset 1-4.  If it contains 0xF3000003 or 0xF300000F we assume it is output from a model 6 scanner
+        //added: as the last byte of the header appears to be a bar code type indicator, lets not even bother with it as we need to go through the process again if another bar code type gets thrown in.
         NSString* currentData;
-        if (scanData->seq == 0xF3 && scanData->f2 == 0x00 && scanData->f3 == 0x00 && scanData->f4 == 0x03)
+        if (scanData->seq == 0xF3 && scanData->f2 == 0x00 && scanData->f3 == 0x00)
         {
             int lth = scanData->f1 - 5;
             currentData = [[NSString alloc] initWithBytes:&scanData->f4a length:lth encoding:NSASCIIStringEncoding];
