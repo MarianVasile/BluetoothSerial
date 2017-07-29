@@ -1,0 +1,17 @@
+{
+	"name": "BluetoothSerial",
+	"version": "0.3.4",
+	"description": "Mobile Bluetooth Serial Plugin",
+	"keywords": ["bluetooth", "mobile","cordova"],
+	"homepage": "https://github.com/niou.ns/BluetoothSerial",
+	"licenses" : [
+	    { "type": "Apache License 2.0", "url": "https://github.com/MarianVasile/BluetoothSerial/blob/master/LICENSE.txt" }
+	],
+	"repository": {
+		"type" : "git",
+		"url" : "https://github.com/MarianVasile/BluetoothSerial.git"
+	},
+    "engines": {
+        "node": ">=4"
+    }
+}
